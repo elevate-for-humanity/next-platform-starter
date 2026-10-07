@@ -267,6 +267,11 @@ export const headerNavigation: NavGroup[] = [
         description: 'Professional tax preparation software for EROs and tax offices',
       },
       {
+        label: 'Software Demo',
+        href: '/tax-software/demo',
+        description: 'End-to-end Supersonic Fast Cash software demonstration',
+      },
+      {
         label: 'Tax Preparation',
         href: '/tax',
         description: 'Tax preparation services for taxpayers',
