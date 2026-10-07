@@ -20,7 +20,7 @@ This document is a build gate for Supersonic Fast Cash. A configuration variable
 - Complete the IRS ATS questionnaire for each applicable form/package.
 - Run the IRS-prescribed TY2026 ATS scenarios.
 - Store submission IDs, acknowledgments, rejects, rule IDs and evidence for every test.
-- Production transmission stays disabled until required ATS testing is accepted and production authorization/credentials are active.
+- Track ATS acceptance and production authorization/credentials as readiness status. Do not use this status to block development, XML generation, validation, or ATS testing.
 
 ## A2A transmission security
 If Supersonic uses A2A:
@@ -65,8 +65,10 @@ For online individual-return filing, implement the current Publication 1345 secu
 - Capture required taxpayer signatures/authorizations and retain them under applicable IRS rules.
 - Log material return changes and the identity of the preparer/user making them.
 
-## Supersonic release gate
-Production IRS transmit must remain OFF unless all are true:
+## Supersonic production-readiness checklist
+These checks report production readiness and guide testing. They do not disable software capabilities, ATS testing, XML generation, validation, return preparation, or development workflows. Actual IRS production transmission requires the applicable IRS production endpoint, credentials, certificate/enrollment, and authorization when the operator chooses to transmit.
+
+Production readiness should verify:
 1. Correct provider roles/MeF authorities are active.
 2. Required IRS identifiers and A2A/IFA enrollment are active.
 3. Current schema/business-rule package is installed.
