@@ -1,119 +1,13 @@
 import Link from 'next/link';
-import { ArrowRight, Building2, CheckCircle2, FileCheck2, Landmark, LockKeyhole, ShieldCheck, Workflow } from 'lucide-react';
-
-export const metadata = {
-  title: 'Supersonic Fast Cash Tax Software | Professional Tax Preparation Platform',
-  description:
-    'Professional tax preparation software for EROs and tax offices with client intake, preparer workflows, IRS MeF architecture, acknowledgments, and bank-product integration readiness.',
-};
-
-const capabilities = [
-  ['Tax Office Management', 'Manage offices, preparers, client assignments, PTIN authorization status, return workflow, and audit history.', Building2],
-  ['Return Preparation', 'Structured client, dependent, W-2, 1099, Schedule C, deduction, calculation, draft, and review workflows.', FileCheck2],
-  ['IRS MeF Architecture', 'Submission, transmission-status, acknowledgment, rejection, and error-tracking infrastructure designed for IRS Modernized e-File workflows.', Landmark],
-  ['Bank Product Ready', 'Refund-advance and refund-transfer workflow architecture prepared for approved provider integrations, including EPS configuration support.', Workflow],
-  ['Security by Design', 'Role-based access, row-level security, audit records, protected document references, and separation of provider credentials from application data.', ShieldCheck],
-  ['Client Document Workflow', 'Secure document records linked to clients and returns with review and verification states.', LockKeyhole],
-] as const;
-
-export default function TaxSoftwarePage() {
-  return (
-    <main className="min-h-screen bg-slate-950 text-white">
-      <section className="border-b border-white/10">
-        <div className="mx-auto max-w-7xl px-6 py-20 lg:px-8 lg:py-28">
-          <div className="max-w-4xl">
-            <p className="mb-5 text-sm font-semibold uppercase tracking-[0.2em] text-emerald-300">
-              Supersonic Fast Cash Software
-            </p>
-            <h1 className="text-4xl font-bold tracking-tight sm:text-6xl">
-              Professional tax software built for the complete tax-office workflow.
-            </h1>
-            <p className="mt-7 max-w-3xl text-lg leading-8 text-slate-300">
-              Prepare returns, manage preparers and offices, organize taxpayer documents, track filing status,
-              and operate from one secure platform designed around professional tax preparation and electronic filing.
-            </p>
-            <div className="mt-9 flex flex-wrap gap-4">
-              <Link href="/contact" className="inline-flex items-center gap-2 rounded-lg bg-white px-5 py-3 font-semibold text-slate-950">
-                Software partnership inquiry <ArrowRight className="h-4 w-4" />
-              </Link>
-              <Link href="/tax" className="rounded-lg border border-white/20 px-5 py-3 font-semibold text-white">
-                Tax preparation services
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="bg-white text-slate-950">
-        <div className="mx-auto max-w-7xl px-6 py-16 lg:px-8">
-          <div className="max-w-3xl">
-            <p className="text-sm font-semibold uppercase tracking-wider text-slate-500">Platform capabilities</p>
-            <h2 className="mt-3 text-3xl font-bold">One operating system for a professional tax office.</h2>
-          </div>
-          <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-            {capabilities.map(([title, description, Icon]) => (
-              <article key={title} className="rounded-2xl border border-slate-200 p-6">
-                <Icon className="h-7 w-7" />
-                <h3 className="mt-5 text-lg font-bold">{title}</h3>
-                <p className="mt-2 leading-7 text-slate-600">{description}</p>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="bg-slate-100 text-slate-950">
-        <div className="mx-auto grid max-w-7xl gap-10 px-6 py-16 lg:grid-cols-2 lg:px-8">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-wider text-slate-500">For tax professionals</p>
-            <h2 className="mt-3 text-3xl font-bold">Designed for EROs, preparers, and multi-office operations.</h2>
-            <div className="mt-7 space-y-4">
-              {[
-                'Office and preparer management',
-                'Return preparation and review states',
-                'Taxpayer document organization',
-                'Electronic-filing status and rejection workflow',
-                'Refund-advance application workflow',
-                'Audit and compliance records',
-              ].map((item) => (
-                <div key={item} className="flex gap-3">
-                  <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0" />
-                  <span>{item}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-          <aside className="rounded-2xl bg-slate-950 p-7 text-white">
-            <p className="text-sm font-semibold uppercase tracking-wider text-emerald-300">Integration status</p>
-            <h2 className="mt-3 text-2xl font-bold">Built for approved IRS and banking-provider connections.</h2>
-            <p className="mt-4 leading-7 text-slate-300">
-              Supersonic Fast Cash includes architecture for IRS MeF and EPS bank-product connectivity.
-              Production transmission and bank products are enabled only after the applicable external
-              certification, credentials, testing, and provider approval are complete.
-            </p>
-            <p className="mt-5 text-sm leading-6 text-slate-400">
-              This page does not represent current EPS certification, Pathward approval, or IRS software-provider
-              production authorization where those approvals have not yet been issued.
-            </p>
-          </aside>
-        </div>
-      </section>
-
-      <section className="bg-white text-slate-950">
-        <div className="mx-auto max-w-7xl px-6 py-16 lg:px-8">
-          <div className="rounded-3xl border border-slate-200 p-8 lg:flex lg:items-center lg:justify-between">
-            <div className="max-w-2xl">
-              <h2 className="text-2xl font-bold">Software providers and financial partners</h2>
-              <p className="mt-3 text-slate-600">
-                Contact us for technical integration, certification, bank-product, and software-partnership discussions.
-              </p>
-            </div>
-            <Link href="/contact" className="mt-6 inline-flex items-center gap-2 rounded-lg bg-slate-950 px-5 py-3 font-semibold text-white lg:mt-0">
-              Contact the software team <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
-        </div>
-      </section>
-    </main>
-  );
-}
+import { ArrowRight, Bot, BriefcaseBusiness, CheckCircle2, FileUp, ShieldCheck, Sparkles, UserRound } from 'lucide-react';
+export const metadata={title:'Supersonic Fast Cash | File Your Taxes or Run Your Tax Office',description:'Guided self-file tax preparation and professional tax-office software with document import, PARIS interview assistance, review workflows, and e-file architecture.'};
+const selfFile=['Guided step-by-step tax interview','Upload W-2 and supported 1099 documents','Review imported values before they enter the return','Plain-language explanations and progress tracking','Return review before electronic filing'];
+const pro=['Tax office and preparer management','Client intake and document workflow','W-2, 1099, Schedule C and deduction workflows','Review, rejection and acknowledgment tracking','IRS MeF and approved bank-product integration architecture'];
+export default function TaxSoftwarePage(){return <main className="min-h-screen bg-white text-slate-950">
+<section className="overflow-hidden bg-gradient-to-b from-sky-50 to-white"><div className="mx-auto max-w-7xl px-6 py-20 lg:grid lg:grid-cols-2 lg:items-center lg:gap-14 lg:px-8 lg:py-28">
+<div><div className="inline-flex items-center gap-2 rounded-full border border-sky-200 bg-white px-4 py-2 text-sm font-semibold text-sky-900"><Sparkles className="h-4 w-4"/> Supersonic Fast Cash Tax Software</div><h1 className="mt-6 text-4xl font-bold tracking-tight sm:text-6xl">Taxes, guided from start to finish.</h1><p className="mt-6 max-w-2xl text-lg leading-8 text-slate-600">File your own return with a guided interview or use the professional workspace to prepare returns for clients. Upload tax documents, answer simple questions, review the return, and move through one clear workflow.</p><div className="mt-9 flex flex-wrap gap-4"><Link href="/tax-software/self-file" className="inline-flex items-center gap-2 rounded-xl bg-sky-700 px-6 py-3.5 font-semibold text-white">Start self-file <ArrowRight className="h-4 w-4"/></Link><Link href="/tax-software/professional" className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-6 py-3.5 font-semibold">Professional software <BriefcaseBusiness className="h-4 w-4"/></Link></div><p className="mt-4 text-sm text-slate-500">You review your information before filing. External e-file and bank products require applicable provider approval and production credentials.</p></div>
+<div className="mt-12 rounded-3xl border border-slate-200 bg-white p-6 shadow-xl lg:mt-0"><div className="flex items-center justify-between border-b border-slate-100 pb-4"><div><p className="text-sm text-slate-500">Guided return</p><p className="font-bold">Your 2026 Federal Return</p></div><span className="rounded-full bg-emerald-50 px-3 py-1 text-sm font-semibold text-emerald-800">Interview</span></div><div className="py-6"><div className="h-2 overflow-hidden rounded-full bg-slate-100"><div className="h-full w-2/5 rounded-full bg-sky-600"/></div><p className="mt-3 text-sm text-slate-500">Income · Step 4 of 10</p><div className="mt-6 rounded-2xl bg-slate-50 p-5"><div className="flex gap-3"><Bot className="mt-1 h-6 w-6 text-sky-700"/><div><p className="font-bold">PARIS</p><p className="mt-1 text-slate-700">Let’s add your income. Do you have a W-2 from an employer?</p></div></div><div className="mt-5 grid grid-cols-2 gap-3"><div className="rounded-xl border bg-white p-3 text-center font-semibold">Yes</div><div className="rounded-xl border bg-white p-3 text-center font-semibold">No</div></div><div className="mt-3 rounded-xl border border-dashed border-slate-300 bg-white p-4 text-center"><FileUp className="mx-auto h-5 w-5"/><p className="mt-2 font-semibold">Upload or photograph W-2</p><p className="text-xs text-slate-500">Imported fields must be reviewed before use.</p></div></div></div></div>
+</div></section>
+<section className="mx-auto max-w-7xl px-6 py-16 lg:px-8"><div className="grid gap-6 lg:grid-cols-2"><article className="rounded-3xl border border-slate-200 p-8"><UserRound className="h-8 w-8 text-sky-700"/><p className="mt-5 text-sm font-bold uppercase tracking-wider text-sky-700">For individuals</p><h2 className="mt-2 text-3xl font-bold">Prepare your own taxes</h2><p className="mt-3 text-slate-600">PARIS guides the interview, explains questions, helps organize imported tax documents, and builds the return workflow for your review.</p><div className="mt-7 space-y-3">{selfFile.map(x=><div key={x} className="flex gap-3"><CheckCircle2 className="mt-0.5 h-5 w-5 text-emerald-600"/><span>{x}</span></div>)}</div><Link href="/tax-software/self-file" className="mt-8 inline-flex items-center gap-2 font-bold text-sky-800">Explore self-file <ArrowRight className="h-4 w-4"/></Link></article>
+<article className="rounded-3xl bg-slate-950 p-8 text-white"><BriefcaseBusiness className="h-8 w-8 text-sky-300"/><p className="mt-5 text-sm font-bold uppercase tracking-wider text-sky-300">For tax professionals</p><h2 className="mt-2 text-3xl font-bold">Run your tax office</h2><p className="mt-3 text-slate-300">A professional workspace for preparers, EROs and multi-office operations with controlled access and auditable return workflows.</p><div className="mt-7 space-y-3">{pro.map(x=><div key={x} className="flex gap-3"><CheckCircle2 className="mt-0.5 h-5 w-5 text-emerald-300"/><span>{x}</span></div>)}</div><Link href="/tax-software/professional" className="mt-8 inline-flex items-center gap-2 font-bold text-sky-300">Explore professional software <ArrowRight className="h-4 w-4"/></Link></article></div></section>
+<section className="border-t bg-slate-50"><div className="mx-auto max-w-7xl px-6 py-12 lg:px-8"><div className="flex gap-4"><ShieldCheck className="h-7 w-7"/><div><h2 className="text-xl font-bold">Review before filing</h2><p className="mt-2 max-w-3xl text-slate-600">Document extraction and PARIS assistance accelerate data entry, but imported values, taxpayer answers, elections, signatures and the final return remain reviewable before electronic submission.</p></div></div></div></section></main>}
