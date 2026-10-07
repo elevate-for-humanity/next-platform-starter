@@ -201,6 +201,11 @@ export const headerNavigation: NavGroup[] = [
         description: 'Technology integration',
       },
       {
+        label: 'Supersonic Tax Software',
+        href: '/tax-software',
+        description: 'Professional tax software and integration partnerships',
+      },
+      {
         label: 'Workforce Partners',
         href: '/partners/workforce',
         description: 'Workforce development partnerships',
