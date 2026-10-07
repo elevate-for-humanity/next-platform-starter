@@ -258,6 +258,27 @@ export const headerNavigation: NavGroup[] = [
     ],
   },
   {
+    label: 'Tax Software',
+    href: '/tax-software',
+    items: [
+      {
+        label: 'Supersonic Fast Cash',
+        href: '/tax-software',
+        description: 'Professional tax preparation software for EROs and tax offices',
+      },
+      {
+        label: 'Software Demo',
+        href: '/tax-software/demo',
+        description: 'End-to-end Supersonic Fast Cash software demonstration',
+      },
+      {
+        label: 'Tax Preparation',
+        href: '/tax',
+        description: 'Tax preparation services for taxpayers',
+      },
+    ],
+  },
+  {
     label: 'About',
     items: [
       { label: 'Our Mission', href: '/about', description: 'Who we are and what we do' },

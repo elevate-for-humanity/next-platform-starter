@@ -24,12 +24,13 @@ export const maxDuration = 120; // OCR can take time
 // Dynamic import to avoid bundling tesseract.js into the main handler
 async function getOCRFunctions() {
   const ocr = await import('@/lib/ocr/tesseract-ocr');
+  const tax = await import('@/lib/tax-software/document-extraction');
   return {
     extractTextFromImage: ocr.extractTextFromImage,
     autoExtract: ocr.autoExtract,
-    extractW2Data: ocr.extractW2Data,
-    extract1099Data: ocr.extract1099Data,
-    extractIDData: ocr.extractIDData,
+    extractW2Data: tax.extractW2Data,
+    extract1099Data: tax.extract1099Data,
+    extractIDData: tax.extractIDData,
   };
 }
 
