@@ -108,7 +108,7 @@ export async function POST(req: NextRequest) {
       result = { text: rawText, type: 'pdf', pages: pdfData.numpages };
     } else {
       // For images, use OCR
-      rawText = await extractTextFromImage(buffer);
+      rawText = (await extractTextFromImage(buffer)).text;
 
       // Extract structured data based on document type
       switch (documentType) {
