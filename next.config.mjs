@@ -630,7 +630,7 @@ const nextConfig = {
       // Tax consolidation
       { source: '/tax-filing/:path*', destination: '/tax/:path*', permanent: true },
       { source: '/tax-services/:path*', destination: '/tax/:path*', permanent: true },
-      { source: '/tax-software/:path*', destination: '/tax/:path*', permanent: true },
+      // Supersonic Fast Cash owns /tax-software and its nested application routes.
 
       // Program consolidation
       { source: '/programs-catalog/:path*', destination: '/programs/:path*', permanent: true },
