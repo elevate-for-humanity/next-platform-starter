@@ -201,11 +201,6 @@ export const headerNavigation: NavGroup[] = [
         description: 'Technology integration',
       },
       {
-        label: 'Supersonic Tax Software',
-        href: '/tax-software',
-        description: 'Professional tax software and integration partnerships',
-      },
-      {
         label: 'Workforce Partners',
         href: '/partners/workforce',
         description: 'Workforce development partnerships',
@@ -259,6 +254,22 @@ export const headerNavigation: NavGroup[] = [
         label: 'NRF Partners',
         href: '/partners/nrf',
         description: 'National Retail Federation',
+      },
+    ],
+  },
+  {
+    label: 'Tax Software',
+    href: '/tax-software',
+    items: [
+      {
+        label: 'Supersonic Fast Cash',
+        href: '/tax-software',
+        description: 'Professional tax preparation software for EROs and tax offices',
+      },
+      {
+        label: 'Tax Preparation',
+        href: '/tax',
+        description: 'Tax preparation services for taxpayers',
       },
     ],
   },
