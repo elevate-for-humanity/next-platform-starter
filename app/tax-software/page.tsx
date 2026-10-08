@@ -29,10 +29,10 @@ const button = 'inline-flex items-center justify-center gap-2 rounded-xl px-6 py
 
 export default function TaxSoftwarePage() {
   return <main className="min-h-screen bg-white text-slate-950">
-    <div className="bg-slate-950 px-5 py-2.5 text-center text-xs font-semibold tracking-wide text-cyan-200">SUPERSONIC FAST CASH · AI-ASSISTED TAX PREPARATION TECHNOLOGY</div>
+    <div className="bg-slate-950 px-5 py-2.5 text-center text-xs font-semibold tracking-wide text-cyan-200">SUPERSONIC FAST CASH TAX SERVICE · AI-ASSISTED SOFTWARE</div>
     <header className="border-b border-slate-200 bg-white">
       <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-5 py-5 lg:px-8">
-        <Link href="/tax-software" className="flex items-center gap-3" aria-label="Supersonic Fast Cash home"><span className="grid h-11 w-11 place-items-center rounded-xl bg-slate-950 text-2xl font-black italic text-cyan-300">S</span><span className="text-lg font-black leading-tight">SUPERSONIC<span className="block text-xs tracking-[.25em] text-sky-700">FAST CASH</span></span></Link>
+        <Link href="/tax-software" className="flex items-center gap-3" aria-label="Supersonic Fast Cash home"><span className="grid h-11 w-11 place-items-center rounded-xl bg-slate-950 text-2xl font-black italic text-cyan-300">S</span><span className="text-lg font-black leading-tight">SUPERSONIC<span className="block text-xs tracking-[.16em] text-sky-700">FAST CASH TAX SERVICE</span></span></Link>
         <nav aria-label="Tax software navigation" className="flex flex-wrap gap-5 text-sm font-semibold text-slate-700"><Link href="#solutions">Solutions</Link><Link href="/tax-software/features">Features</Link><Link href="/tax-software/bank-products">Bank Products</Link><Link href="/tax-software/pricing">Pricing</Link><Link href="/tax-software/about">About</Link><Link href="#features">Features</Link><Link href="#process">How it works</Link><Link href="/tax-software/demo">Demo</Link></nav>
         <Link href="/tax-software/self-file" className={button+' bg-slate-950 text-white'}>Get started <ArrowRight className="h-4 w-4"/></Link>
       </div>
