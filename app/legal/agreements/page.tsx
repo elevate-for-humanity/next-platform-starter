@@ -1,3 +1,4 @@
+import { PLATFORM_DEFAULTS } from '@/lib/config/platform-config';
 'use client';
 
 
@@ -8,7 +9,6 @@ import Image from 'next/image';
 import { createClient } from '@/lib/supabase/client';
 import SignatureCanvas from 'signature_pad';
 import {
-import { PLATFORM_DEFAULTS } from '@/lib/config/platform-config';
 
   FileText,
   Check,
@@ -75,7 +75,7 @@ const AGREEMENT_DEFINITIONS: Record<string, Omit<Agreement, 'type' | 'version'> 
   },
   staff_agreement: {
     title: 'Staff Agreement',
-    description: 'Terms of employment and confidentiality obligations for {PLATFORM_DEFAULTS.orgName} staff and contractors.',
+    description: `Terms of employment and confidentiality obligations for ${PLATFORM_DEFAULTS.orgName} staff and contractors.`,
     documentUrl: '/legal/staff-agreement',
     img: '/images/pages/admin-signatures-hero.webp',
     icon: UserCheck,
