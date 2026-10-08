@@ -1,0 +1,17 @@
+# Validate tax software outside Cloud Shell; never deploy from this pipeline.
+steps:
+  - name: 'node:22-bookworm'
+    id: 'dependencies-and-typecheck'
+    entrypoint: 'bash'
+    args:
+      - '-euc'
+      - |
+        corepack enable
+        corepack prepare pnpm@10.28.2 --activate
+        pnpm install --no-frozen-lockfile
+        pnpm run typecheck
+    env:
+      - 'CI=true'
+options:
+  logging: CLOUD_LOGGING_ONLY
+timeout: '3600s'
