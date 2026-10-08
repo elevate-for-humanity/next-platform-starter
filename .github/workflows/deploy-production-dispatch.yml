@@ -1,69 +1,11 @@
-name: Deploy production (both services)
-
-# Manual full-platform deploy when production SHAs lag behind main.
+name: Google production deployment
 on:
   workflow_dispatch:
-
 permissions:
   contents: read
-
-concurrency:
-  group: northflank-production-full
-  cancel-in-progress: false
-
+  id-token: write
 jobs:
-  deploy-both:
-    name: Configure, build, and verify LMS + Admin
+  guard:
     runs-on: ubuntu-latest
-    env:
-      NORTHFLANK_API_TOKEN: ${{ secrets.NORTHFLANK_API_TOKEN }}
-      NORTHFLANK_TEAM_ID: ${{ secrets.NORTHFLANK_TEAM_ID || 'elevates-team' }}
-      NORTHFLANK_PROJECT_ID: ${{ secrets.NORTHFLANK_PROJECT_ID || 'elevate-platform' }}
-      NORTHFLANK_LMS_SERVICE_ID: ${{ secrets.NORTHFLANK_LMS_SERVICE_ID || 'elevate-lms' }}
-      NORTHFLANK_ADMIN_SERVICE_ID: ${{ secrets.NORTHFLANK_ADMIN_SERVICE_ID || 'elevate-admin' }}
-      DEPLOY_BRANCH: main
-      NORTHFLANK_EPHEMERAL_STORAGE_MB: '32768'
-      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-      EXPECTED_SHA: ${{ github.sha }}
-
     steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: main
-
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 10.28.2
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-
-      - run: pnpm install --no-frozen-lockfile
-
-      - name: Configure Northflank (LMS + admin)
-        run: pnpm tsx scripts/northflank/configure-services.ts --all --execute
-
-      - name: Verify health probes on /api/ping
-        run: pnpm tsx scripts/northflank/verify-health-checks.ts --all
-
-      - name: Set branches to main
-        run: |
-          pnpm tsx scripts/northflank/set-service-branch.ts "$NORTHFLANK_LMS_SERVICE_ID" main
-          pnpm tsx scripts/northflank/set-service-branch.ts "$NORTHFLANK_ADMIN_SERVICE_ID" main
-
-      - name: Trigger builds
-        run: |
-          pnpm tsx scripts/northflank/trigger-build.ts "$NORTHFLANK_LMS_SERVICE_ID"
-          pnpm tsx scripts/northflank/trigger-build.ts "$NORTHFLANK_ADMIN_SERVICE_ID"
-
-      - name: Wait for admin
-        run: pnpm tsx scripts/northflank/wait-service.ts "$NORTHFLANK_ADMIN_SERVICE_ID" --timeout-ms 1200000
-
-      - name: Wait for LMS
-        run: pnpm tsx scripts/northflank/wait-service.ts "$NORTHFLANK_LMS_SERVICE_ID" --timeout-ms 3600000
-
-      - name: Verify both SHAs match main
-        run: pnpm tsx scripts/northflank/verify-deployed-sha.ts
+      - run: echo "Deploy LMS and Admin using the separate Google Cloud Run workflows; this workflow intentionally cannot trigger Northflank."
