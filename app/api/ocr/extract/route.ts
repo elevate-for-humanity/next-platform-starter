@@ -93,41 +93,44 @@ export async function POST(req: NextRequest) {
     const buffer = Buffer.from(arrayBuffer);
 
     // Get OCR functions (dynamic import)
-    const { extractTextFromImage, autoExtract, extractW2Data, extract1099Data, extractIDData } =
+    const { autoExtract, extractW2Data, extract1099Data, extractIDData } =
       await getOCRFunctions();
 
     let result: any;
     let rawText: string;
 
-    // Handle based on document type
-    if (file.type === 'application/pdf') {
-      // For PDFs, use pdf-parse
-      const pdfParse = (await import('pdf-parse')).default;
-      const pdfData = await pdfParse(buffer);
-      rawText = pdfData.text;
-      result = { text: rawText, type: 'pdf', pages: pdfData.numpages };
-    } else {
-      // For images, use OCR
-      rawText = await extractTextFromImage(buffer);
+    // Extract text from PDFs and images using the same document-specific pipeline.
+    // A PDF with no extractable text is reported as an error, not a successful import.
+    const extracted = await autoExtract(buffer, file.type);
+    rawText = extracted.text;
+    if (!rawText.trim()) {
+      return NextResponse.json(
+        { success: false, error: 'No readable text found in the document. Upload a clearer image or text-based PDF.' },
+        { status: 422 },
+      );
+    }
 
-      // Extract structured data based on document type
-      switch (documentType) {
-        case 'w2':
-          result = await extractW2Data(buffer);
-          break;
-        case '1099':
-          result = await extract1099Data(buffer);
-          break;
-        case 'id':
-        case 'drivers_license':
-          result = await extractIDData(buffer);
-          break;
-        case 'auto':
-          result = await autoExtract(buffer);
-          break;
-        default:
-          result = { text: rawText, type: documentType };
-      }
+    switch (documentType) {
+      case 'w2':
+      case '1099':
+        // Structured extraction currently requires a rendered image.
+        // Do not return a misleading successful W-2/1099 import for a PDF.
+        if (file.type === 'application/pdf') {
+          return NextResponse.json(
+            { success: false, error: 'For structured W-2/1099 import, upload a JPEG, PNG, or WebP image of the document.' },
+            { status: 422 },
+          );
+        }
+        result = documentType === 'w2'
+          ? await extractW2Data(buffer)
+          : await extract1099Data(buffer);
+        break;
+      case 'id':
+      case 'drivers_license':
+        result = file.type === 'application/pdf' ? extracted : await extractIDData(buffer);
+        break;
+      default:
+        result = extracted;
     }
 
     // Log extraction for audit
