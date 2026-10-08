@@ -1,11 +1,24 @@
 name: Deploy LMS to Google Cloud Run
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'app/**'
+      - 'components/**'
+      - 'lib/**'
+      - 'packages/**'
+      - 'public/**'
+      - 'next.config.mjs'
+      - 'Dockerfile.northflank-lms'
+      - 'pnpm-lock.yaml'
+      - 'package.json'
+      - '.github/workflows/deploy-lms.yml'
   workflow_dispatch:
 permissions:
   contents: read
   id-token: write
 concurrency:
-  group: google-cloud-lms-deploy
+  group: google-cloud-web-deploy
   cancel-in-progress: false
 jobs:
   deploy:
