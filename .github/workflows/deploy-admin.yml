@@ -79,3 +79,37 @@ jobs:
           IMAGE="$REGION-docker.pkg.dev/$PROJECT/$REPOSITORY/tax-admin:${GITHUB_SHA}"
           gcloud run deploy "$SERVICE" --image "$IMAGE" --project "$PROJECT" --region "$REGION" --quiet
           gcloud run services describe "$SERVICE" --project "$PROJECT" --region "$REGION" --format='value(status.conditions)'
+
+      - name: Verify deployed revision and traffic
+        env:
+          PROJECT: ${{ vars.GCP_PROJECT_ID }}
+          REGION: ${{ vars.GCP_REGION }}
+          SERVICE: ${{ vars.GCP_ADMIN_SERVICE }}
+          REPOSITORY: ${{ vars.GCP_ARTIFACT_REPOSITORY }}
+        run: |
+          set -euo pipefail
+          expected="$REGION-docker.pkg.dev/$PROJECT/$REPOSITORY/tax-admin:${GITHUB_SHA}"
+          ready="$(gcloud run services describe "$SERVICE" --project "$PROJECT" --region "$REGION" --format='value(status.latestReadyRevisionName)')"
+          test -n "$ready" || { echo "::error::No ready revision"; exit 1; }
+          image="$(gcloud run revisions describe "$ready" --project "$PROJECT" --region "$REGION" --format='value(spec.containers[0].image)')"
+          test "$image" = "$expected" || { echo "::error::Ready revision image mismatch"; exit 1; }
+          gcloud run services describe "$SERVICE" --project "$PROJECT" --region "$REGION" --format=json > /tmp/cloud-run-service.json
+          python3 - "$ready" <<'PY'
+          import json, sys
+          status = json.load(open("/tmp/cloud-run-service.json"))["status"]
+          ready = sys.argv[1]
+          conditions = status.get("conditions", [])
+          assert any(c.get("type") == "Ready" and c.get("status") == "True" for c in conditions), "Cloud Run Ready condition is not True"
+          traffic = status.get("traffic", [])
+          assert sum(int(t.get("percent", 0)) for t in traffic if t.get("revisionName") == ready) == 100, "Latest ready revision is not serving 100% of traffic"
+          PY
+          traffic="100"
+          {
+            echo "### Google Cloud Run deployment verified"
+            echo "- Service: $SERVICE"
+            echo "- Project: $PROJECT"
+            echo "- Revision: $ready"
+            echo "- Commit: $GITHUB_SHA"
+            echo "- Ready image: $image"
+            echo "- Traffic: $traffic%"
+          } >> "$GITHUB_STEP_SUMMARY"
