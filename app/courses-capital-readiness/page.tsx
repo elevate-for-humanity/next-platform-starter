@@ -1,8 +1,8 @@
+import { PLATFORM_DEFAULTS } from '@/lib/config/platform-config';
 
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { 
-import { PLATFORM_DEFAULTS } from '@/lib/config/platform-config';
+import {
   
   BookOpen, 
   Award, 
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     title: 'Capital Readiness Course for Workforce & Licensed Organizations',
     description: 'Learn to build institutional trust, pass audits, and access funding.',
     url: `${siteUrl}/courses/capital-readiness`,
-    siteName: '{PLATFORM_DEFAULTS.orgName}',
+    siteName: PLATFORM_DEFAULTS.orgName,
     type: 'website',
     images: [
       {
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Capital Readiness Course | {PLATFORM_DEFAULTS.orgName}',
+    title: `Capital Readiness Course | ${PLATFORM_DEFAULTS.orgName}`,
     description: 'Learn to build institutional trust, pass audits, and access funding.',
   },
   alternates: {
@@ -53,7 +53,7 @@ const courseSchema = {
   description: 'A structured course on capital readiness, compliance, and institutional trust for licensed businesses, workforce-aligned employers, and nonprofits.',
   provider: {
     '@type': 'Organization',
-    name: '{PLATFORM_DEFAULTS.orgName}',
+    name: PLATFORM_DEFAULTS.orgName,
     url: siteUrl,
   },
   educationalLevel: 'Professional',
