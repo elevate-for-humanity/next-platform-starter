@@ -1,7 +1,7 @@
-# Validate tax software outside Cloud Shell; never deploy from this pipeline.
+# Validation only: no production deployment.
 steps:
   - name: 'node:22-bookworm'
-    id: 'dependencies-and-typecheck'
+    id: 'install-dependencies'
     entrypoint: 'bash'
     args:
       - '-euc'
@@ -12,7 +12,21 @@ steps:
         pnpm config set network-concurrency 4
         pnpm config set fetch-retries 5
         pnpm install --no-frozen-lockfile
+        echo INSTALL_COMPLETED
+    env:
+      - 'CI=true'
+  - name: 'node:22-bookworm'
+    id: 'typescript-validation'
+    entrypoint: 'bash'
+    waitFor: ['install-dependencies']
+    args:
+      - '-euc'
+      - |
+        corepack enable
+        corepack prepare pnpm@10.28.2 --activate
+        echo TYPESCRIPT_STARTED
         pnpm run typecheck
+        echo TYPESCRIPT_COMPLETED
     env:
       - 'CI=true'
 options:
