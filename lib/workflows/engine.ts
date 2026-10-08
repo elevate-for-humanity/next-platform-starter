@@ -9,7 +9,7 @@
 import { requireAdminClient } from '@/lib/supabase/admin';
 import { emitEvent } from '@/lib/platform/events';
 import { sendEmail } from '@/lib/email/service';
-import { aiChat } from '@/lib/ai/ai-service';
+import { executeAiTask } from '@/lib/ai/execute-ai-task';
 import { logger } from '@/lib/logger';
 
 export type RunStatus = 'success' | 'failed' | 'running' | 'cancelled';
@@ -187,24 +187,47 @@ async function execAiAction(config: Record<string, unknown>, ctx: RunContext) {
   const prompt = config.prompt as string | undefined;
   if (!prompt) return { ok: false, output: { error: 'ai_action requires prompt' } };
   const resolvedPrompt = String(interpolate(prompt, ctx.triggerPayload));
-  logger.info('[workflow/ai_action] calling aiChat', { run_id: ctx.runId, prompt_length: resolvedPrompt.length });
-  try {
-    const response = await aiChat([
-      { role: 'system', content: 'You are an operational AI assistant for Elevate for Humanity. Respond concisely and factually.' },
-      { role: 'user', content: resolvedPrompt },
-    ]);
-    const persistTable = config.persist_table as string | undefined;
-    const persistMatch = config.persist_match as Record<string, unknown> | string | undefined;
-    const persistField = config.persist_field as string | undefined;
-    if (persistTable && persistMatch && persistField && response) {
-      const db = await requireAdminClient();
-      let matchObj: Record<string, unknown>;
-      try { matchObj = typeof persistMatch === 'string' ? JSON.parse(persistMatch) : persistMatch; }
-      catch { matchObj = {}; }
-      await db.from(persistTable).update({ [persistField]: response }).match(interpolateObj(matchObj, ctx.triggerPayload))
-        .then(undefined, (err) => logger.warn('[workflow/ai_action] persist failed', { run_id: ctx.runId, error: String(err) }));
+  const persistTable = config.persist_table as string | undefined;
+  const persistMatch = config.persist_match as Record<string, unknown> | string | undefined;
+  const persistField = config.persist_field as string | undefined;
+  const persistenceRequested = [persistTable, persistMatch, persistField].some(value => value !== undefined);
+  let matchObj: Record<string, unknown> | undefined;
+  if (persistenceRequested) {
+    if (!persistTable || !persistMatch || !persistField) {
+      return { ok: false, output: { error: 'ai_action persistence requires table, match, and field' } };
     }
-    return { ok: true, output: { response } };
+    try {
+      const parsed = typeof persistMatch === 'string' ? JSON.parse(persistMatch) : persistMatch;
+      if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed) || Object.keys(parsed).length === 0) {
+        throw new Error('Persistence match must be a non-empty object');
+      }
+      matchObj = interpolateObj(parsed, ctx.triggerPayload);
+    } catch {
+      return { ok: false, output: { error: 'ai_action persist_match must be a non-empty JSON object' } };
+    }
+  }
+  try {
+    const result = await executeAiTask({
+      task: 'general_chat',
+      prompt: resolvedPrompt,
+      context: { sessionId: ctx.runId },
+    });
+    if (result.blocked || result.provider === 'degraded' || !result.content?.trim()) {
+      return { ok: false, output: { error: result.blockReason ?? 'AI action did not produce usable content' } };
+    }
+    const response = result.content;
+    if (persistenceRequested) {
+      const db = await requireAdminClient();
+      const { data, error } = await db.from(persistTable!)
+        .update({ [persistField!]: response })
+        .match(matchObj!)
+        .select(persistField!);
+      if (error) return { ok: false, output: { error: error.message } };
+      if (!data?.length || data.some(row => row[persistField!] !== response)) {
+        return { ok: false, output: { error: 'AI action persistence could not be verified' } };
+      }
+    }
+    return { ok: true, output: { response, provider: result.provider, persisted: persistenceRequested } };
   } catch (err: unknown) {
     return { ok: false, output: { error: err instanceof Error ? err.message : String(err) } };
   }

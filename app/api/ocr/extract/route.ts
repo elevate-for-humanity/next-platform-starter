@@ -97,12 +97,11 @@ export async function POST(req: NextRequest) {
       await getOCRFunctions();
 
     let result: any;
-    let rawText: string;
 
     // Extract text from PDFs and images using the same document-specific pipeline.
     // A PDF with no extractable text is reported as an error, not a successful import.
     const extracted = await autoExtract(buffer, file.type);
-    rawText = extracted.text;
+    const rawText = extracted.text;
     if (!rawText.trim()) {
       return NextResponse.json(
         { success: false, error: 'No readable text found in the document. Upload a clearer image or text-based PDF.' },
