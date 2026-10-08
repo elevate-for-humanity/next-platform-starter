@@ -1,9 +1,9 @@
+import { PLATFORM_DEFAULTS } from '@/lib/config/platform-config';
 import { Metadata } from 'next';
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 import Link from 'next/link';
 import Image from 'next/image';
-import { 
-import { PLATFORM_DEFAULTS } from '@/lib/config/platform-config';
+import {
   GraduationCap, 
   BookOpen, 
   Clock, 
@@ -107,7 +107,7 @@ export default function BarberApprenticeshipDemoPage() {
     suppliesCovered: '$650',
     transportationStipend: '$200/month',
     caseManager: 'Sarah Thompson',
-    caseManagerPhone: '{PLATFORM_DEFAULTS.supportPhone}',
+    caseManagerPhone: PLATFORM_DEFAULTS.supportPhone,
   };
 
   const careerServices = [
