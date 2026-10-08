@@ -37,6 +37,13 @@ jobs:
           REGION: ${{ vars.GCP_REGION }}
         run: gcloud auth configure-docker "$REGION-docker.pkg.dev" --quiet
       - uses: docker/setup-buildx-action@v3
+      - name: Verify build configuration
+        env:
+          SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+        run: |
+          set -euo pipefail
+          test -n "$SUPABASE_URL" && test -n "$SUPABASE_KEY" || { echo "::error::Missing Supabase build configuration"; exit 1; }
       - name: Build and push immutable image
         uses: docker/build-push-action@v6
         with:
@@ -45,8 +52,8 @@ jobs:
           push: true
           tags: ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/${{ vars.GCP_ARTIFACT_REPOSITORY }}/tax-lms:${{ github.sha }}
           build-args: |
-            NEXT_PUBLIC_SUPABASE_URL=${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
-            NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ vars.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+            NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+            NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
       - name: Deploy existing Cloud Run service without modifying runtime configuration
         env:
           PROJECT: ${{ vars.GCP_PROJECT_ID }}
