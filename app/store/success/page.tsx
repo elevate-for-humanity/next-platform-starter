@@ -1,10 +1,10 @@
+import { PLATFORM_DEFAULTS } from '@/lib/config/platform-config';
 import Image from 'next/image';
 import { Metadata } from 'next';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import {
-import { PLATFORM_DEFAULTS } from '@/lib/config/platform-config';
   Download,
   Mail,
   ArrowRight,
@@ -12,7 +12,7 @@ import { PLATFORM_DEFAULTS } from '@/lib/config/platform-config';
 CheckCircle, } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Order Successful | {PLATFORM_DEFAULTS.orgName}',
+  title: `Order Successful | ${PLATFORM_DEFAULTS.orgName}`,
   description: 'Your order has been completed successfully.',
   robots: { index: false, follow: false },
 };
