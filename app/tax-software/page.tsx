@@ -1,3 +1,4 @@
+// Google Cloud Run tax software release: preserve external IRS/MeF transmission gating until certified.
 import Link from 'next/link';
 import { ArrowRight, Bot, BriefcaseBusiness, CheckCircle2, FileUp, ShieldCheck, Sparkles, UserRound } from 'lucide-react';
 export const metadata={title:'Supersonic Fast Cash | File Your Taxes or Run Your Tax Office',description:'Guided self-file tax preparation and professional tax-office software with document import, PARIS interview assistance, review workflows, and e-file architecture.'};
