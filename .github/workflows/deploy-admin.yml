@@ -79,3 +79,30 @@ jobs:
           IMAGE="$REGION-docker.pkg.dev/$PROJECT/$REPOSITORY/tax-admin:${GITHUB_SHA}"
           gcloud run deploy "$SERVICE" --image "$IMAGE" --project "$PROJECT" --region "$REGION" --quiet
           gcloud run services describe "$SERVICE" --project "$PROJECT" --region "$REGION" --format='value(status.conditions)'
+
+      - name: Verify deployed revision and traffic
+        env:
+          PROJECT: ${{ vars.GCP_PROJECT_ID }}
+          REGION: ${{ vars.GCP_REGION }}
+          SERVICE: ${{ vars.GCP_ADMIN_SERVICE }}
+          REPOSITORY: ${{ vars.GCP_ARTIFACT_REPOSITORY }}
+        run: |
+          set -euo pipefail
+          expected="$REGION-docker.pkg.dev/$PROJECT/$REPOSITORY/tax-admin:${GITHUB_SHA}"
+          ready="$(gcloud run services describe "$SERVICE" --project "$PROJECT" --region "$REGION" --format='value(status.latestReadyRevisionName)')"
+          test -n "$ready" || { echo "::error::No ready revision"; exit 1; }
+          image="$(gcloud run revisions describe "$ready" --project "$PROJECT" --region "$REGION" --format='value(spec.containers[0].image)')"
+          test "$image" = "$expected" || { echo "::error::Ready revision image mismatch"; exit 1; }
+          ready_condition="$(gcloud run services describe "$SERVICE" --project "$PROJECT" --region "$REGION" --format='value(status.conditions[0].status)')"
+          test "$ready_condition" = "True" || { echo "::error::Cloud Run service not ready"; exit 1; }
+          traffic="$(gcloud run services describe "$SERVICE" --project "$PROJECT" --region "$REGION" --format='value(status.traffic[0].percent)')"
+          test "$traffic" = "100" || { echo "::error::Latest service traffic is not 100%"; exit 1; }
+          {
+            echo "### Google Cloud Run deployment verified"
+            echo "- Service: $SERVICE"
+            echo "- Project: $PROJECT"
+            echo "- Revision: $ready"
+            echo "- Commit: $GITHUB_SHA"
+            echo "- Ready image: $image"
+            echo "- Traffic: $traffic%"
+          } >> "$GITHUB_STEP_SUMMARY"
