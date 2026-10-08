@@ -1,11 +1,24 @@
 name: Deploy ADMIN to Google Cloud Run
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/admin/**'
+      - 'app/admin/**'
+      - 'app/api/admin/**'
+      - 'components/**'
+      - 'lib/**'
+      - 'packages/**'
+      - 'Dockerfile.northflank-admin'
+      - 'pnpm-lock.yaml'
+      - 'package.json'
+      - '.github/workflows/deploy-admin.yml'
   workflow_dispatch:
 permissions:
   contents: read
   id-token: write
 concurrency:
-  group: google-cloud-admin-deploy
+  group: google-cloud-web-deploy
   cancel-in-progress: false
 jobs:
   deploy:
