@@ -1,119 +1,61 @@
-name: Deploy Admin
-
+name: Deploy ADMIN to Google Cloud Run
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'app/admin/**'
-      - 'app/api/admin/**'
-      - 'apps/admin/**'
-      - 'lib/**'
-      - 'components/**'
-      - 'data/**'
-      - 'types/**'
-      - 'styles/**'
-      - 'hooks/**'
-      - 'contexts/**'
-      - 'config/**'
-      - 'content/**'
-      - 'utils/**'
-      - 'packages/**'
-      - 'Dockerfile.northflank-admin'
-      - 'scripts/northflank/**'
-      - 'pnpm-lock.yaml'
-      - 'package.json'
-      - 'pnpm-workspace.yaml'
-      - '.github/workflows/deploy-admin.yml'
   workflow_dispatch:
-
 permissions:
   contents: read
-
+  id-token: write
 concurrency:
-  group: northflank-admin-deploy
+  group: google-cloud-admin-deploy
   cancel-in-progress: false
-
 jobs:
-  deploy-admin:
-    name: Build and deploy admin on Northflank
+  deploy:
     runs-on: ubuntu-latest
-    env:
-      NORTHFLANK_API_TOKEN: ${{ secrets.NORTHFLANK_API_TOKEN }}
-      NORTHFLANK_TEAM_ID: ${{ secrets.NORTHFLANK_TEAM_ID || 'elevates-team' }}
-      NORTHFLANK_PROJECT_ID: ${{ secrets.NORTHFLANK_PROJECT_ID || 'elevate-platform' }}
-      NORTHFLANK_ADMIN_SERVICE_ID: ${{ secrets.NORTHFLANK_ADMIN_SERVICE_ID || 'elevate-admin' }}
-      NORTHFLANK_TARGET_SERVICE: admin
-      DEPLOY_BRANCH: main
-      NORTHFLANK_EPHEMERAL_STORAGE_MB: '32768'
-      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-      ONET_API_KEY: ${{ secrets.ONET_API_KEY }}
-      CAREERONESTOP_USER_ID: ${{ secrets.CAREERONESTOP_USER_ID }}
-      CAREERONESTOP_TOKEN: ${{ secrets.CAREERONESTOP_TOKEN }}
-      USAJOBS_API_KEY: ${{ secrets.USAJOBS_API_KEY }}
-
+    environment: production
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10.28.2
-
-      - name: Set up Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
-
-      - name: Configure Northflank admin service only
-        run: pnpm tsx scripts/northflank/configure-services.ts "$NORTHFLANK_ADMIN_SERVICE_ID" --execute
-
-      - name: Patch admin build ephemeral storage
-        run: pnpm tsx scripts/northflank/patch-ephemeral-storage.ts "$NORTHFLANK_ADMIN_SERVICE_ID" --execute
-
-      - name: Verify admin health probes on /api/ping
-        run: pnpm tsx scripts/northflank/verify-health-checks.ts "$NORTHFLANK_ADMIN_SERVICE_ID"
-
-      - name: Point admin service at main
-        run: pnpm tsx scripts/northflank/set-service-branch.ts "$NORTHFLANK_ADMIN_SERVICE_ID" "$DEPLOY_BRANCH"
-
-      - name: Trigger admin build
-        id: trigger_admin_build
-        run: pnpm tsx scripts/northflank/trigger-build.ts "$NORTHFLANK_ADMIN_SERVICE_ID"
-
-      - name: Roll out latest admin image
-        run: pnpm tsx scripts/northflank/trigger-deployment.ts "$NORTHFLANK_ADMIN_SERVICE_ID"
-
-      - name: Wait for admin deployment
-        run: pnpm tsx scripts/northflank/wait-service.ts "$NORTHFLANK_ADMIN_SERVICE_ID" --build-id "${{ steps.trigger_admin_build.outputs.build_id }}" --timeout-ms 1200000
-
-      - name: Smoke admin
+      - uses: actions/checkout@v4
+      - name: Validate Google-only configuration
+        env:
+          PROJECT: ${{ vars.GCP_PROJECT_ID }}
+          REGION: ${{ vars.GCP_REGION }}
+          PROVIDER: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          ACCOUNT: ${{ vars.GCP_DEPLOY_SERVICE_ACCOUNT }}
+          TARGET: ${{ vars.GCP_ADMIN_SERVICE }}
+          REPOSITORY: ${{ vars.GCP_ARTIFACT_REPOSITORY }}
         run: |
           set -euo pipefail
-          for i in $(seq 1 20); do
-            status=$(curl -sk --max-time 10 -o /tmp/admin-health.json -w "%{http_code}" https://admin.elevateforhumanity.org/api/ping || true)
-            body=$(cat /tmp/admin-health.json 2>/dev/null || true)
-            if [ "$status" = "200" ] && echo "$body" | grep -q '"ok":true'; then
-              echo "Admin liveness passed."
-              exit 0
-            fi
-            echo "Admin liveness not ready yet: HTTP ${status}. Retry ${i}/20."
-            sleep 15
+          for v in PROJECT REGION PROVIDER ACCOUNT TARGET REPOSITORY; do
+            test -n "${!v}" || { echo "::error::Missing Google configuration: $v"; exit 1; }
           done
-          echo "Admin liveness failed after deploy."
-          cat /tmp/admin-health.json 2>/dev/null || true
-          exit 1
-
-      - name: Verify deployed SHA matches main
+          test "$PROJECT" = "elegant-racer-299721" || { echo "::error::Unexpected Google project"; exit 1; }
+      - uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPLOY_SERVICE_ACCOUNT }}
+      - uses: google-github-actions/setup-gcloud@v2
+      - name: Configure Docker authentication
         env:
-          EXPECTED_SHA: ${{ github.sha }}
+          REGION: ${{ vars.GCP_REGION }}
+        run: gcloud auth configure-docker "$REGION-docker.pkg.dev" --quiet
+      - uses: docker/setup-buildx-action@v3
+      - name: Build and push immutable image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile.northflank-admin
+          push: true
+          tags: ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/${{ vars.GCP_ARTIFACT_REPOSITORY }}/tax-admin:${{ github.sha }}
+          build-args: |
+            NEXT_PUBLIC_SUPABASE_URL=${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
+            NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ vars.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+      - name: Deploy existing Cloud Run service without modifying runtime configuration
+        env:
+          PROJECT: ${{ vars.GCP_PROJECT_ID }}
+          REGION: ${{ vars.GCP_REGION }}
+          SERVICE: ${{ vars.GCP_ADMIN_SERVICE }}
+          REPOSITORY: ${{ vars.GCP_ARTIFACT_REPOSITORY }}
         run: |
-          # If deploy is stale due to concurrent workflows, trust SUCCESS/COMPLETED status
-          pnpm tsx scripts/northflank/verify-deployed-sha.ts elevate-admin --trust-deploy-status
+          set -euo pipefail
+          gcloud run services describe "$SERVICE" --project "$PROJECT" --region "$REGION" --format='value(metadata.name)' >/dev/null
+          IMAGE="$REGION-docker.pkg.dev/$PROJECT/$REPOSITORY/tax-admin:${GITHUB_SHA}"
+          gcloud run deploy "$SERVICE" --image "$IMAGE" --project "$PROJECT" --region "$REGION" --quiet
+          gcloud run services describe "$SERVICE" --project "$PROJECT" --region "$REGION" --format='value(status.conditions)'
