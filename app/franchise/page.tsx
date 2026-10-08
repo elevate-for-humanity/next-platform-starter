@@ -1,3 +1,4 @@
+import { PLATFORM_DEFAULTS } from '@/lib/config/platform-config';
 export const dynamic = 'force-static';
 export const revalidate = 3600;
 
@@ -6,7 +7,6 @@ import { Metadata } from 'next';
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 import Link from 'next/link';
 import {
-import { PLATFORM_DEFAULTS } from '@/lib/config/platform-config';
   DollarSign,
   TrendingUp,
   Users,
@@ -18,7 +18,7 @@ import { PLATFORM_DEFAULTS } from '@/lib/config/platform-config';
 
 export const metadata: Metadata = {
   title:
-    'Franchise Opportunities | Start Your Own Training Center | {PLATFORM_DEFAULTS.orgName}',
+    `Franchise Opportunities | Start Your Own Training Center | ${PLATFORM_DEFAULTS.orgName}`,
   description:
     'Own your own workforce development training center. Full turnkey franchise with DOL approval, curriculum, marketing, and support. Low startup cost. High profit potential. Serving communities nationwide.',
   keywords: [
