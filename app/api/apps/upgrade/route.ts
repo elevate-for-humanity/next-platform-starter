@@ -39,7 +39,13 @@ async function _POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { appSlug, plan } = await request.json();
+    const { appSlug, plan, couponCode } = await request.json();
+
+    // Fail closed: a validated display coupon is not a payment discount.
+    // Do not create a full-price subscription if the customer supplied a code.
+    if (typeof couponCode === 'string' && couponCode.trim()) {
+      return NextResponse.json({ error: 'Coupon checkout is not yet enabled for app subscriptions. No charge was initiated.' }, { status: 409 });
+    }
 
     if (!appSlug || !plan) {
       return NextResponse.json({ error: 'App slug and plan required' }, { status: 400 });
