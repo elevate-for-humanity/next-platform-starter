@@ -12,12 +12,12 @@ const client = new Client({
 
 async function main() {
   try {
-    console.log('🔌 Connecting to Supabase PostgreSQL...');
+    console.info('🔌 Connecting to Supabase PostgreSQL...');
     await client.connect();
-    console.log('✅ Connected!\n');
+    console.info('✅ Connected!\n');
 
     // Check for schema_migrations table
-    console.log('📊 Checking schema_migrations table...');
+    console.info('📊 Checking schema_migrations table...');
     const migrationsResult = await client.query(`
       SELECT table_name 
       FROM information_schema.tables 
@@ -26,26 +26,26 @@ async function main() {
     `);
     
     if (migrationsResult.rows.length === 0) {
-      console.log('⚠️  No schema_migrations table found. Will run all migrations.');
+      console.info('⚠️  No schema_migrations table found. Will run all migrations.');
     } else {
-      console.log(`✅ Found: ${migrationsResult.rows.map(r => r.table_name).join(', ')}`);
+      console.info(`✅ Found: ${migrationsResult.rows.map(r => r.table_name).join(', ')}`);
     }
 
     // Check Supabase migrations
-    console.log('\n📋 Checking Supabase schema_migrations...');
+    console.info('\n📋 Checking Supabase schema_migrations...');
     const supabaseMigrations = await client.query(`
       SELECT version, executed_at 
       FROM schema_migrations 
       ORDER BY version
     `).catch(() => ({ rows: [] }));
     
-    console.log(`Found ${supabaseMigrations.rows.length} migrations already executed:`);
+    console.info(`Found ${supabaseMigrations.rows.length} migrations already executed:`);
     supabaseMigrations.rows.forEach(r => {
-      console.log(`  - ${r.version} (${r.executed_at})`);
+      console.info(`  - ${r.version} (${r.executed_at})`);
     });
 
     // Check for elevatemigrations table
-    console.log('\n📋 Checking for Elevate migrations table...');
+    console.info('\n📋 Checking for Elevate migrations table...');
     const elevateMigrations = await client.query(`
       SELECT version, applied_at 
       FROM elevatemigrations 
@@ -53,25 +53,25 @@ async function main() {
     `).catch(() => ({ rows: [] }));
     
     if (elevateMigrations.rows.length > 0) {
-      console.log(`Found ${elevateMigrations.rows.length} Elevate migrations:`);
+      console.info(`Found ${elevateMigrations.rows.length} Elevate migrations:`);
       elevateMigrations.rows.forEach(r => {
-        console.log(`  - ${r.version}`);
+        console.info(`  - ${r.version}`);
       });
     } else {
-      console.log('⚠️  No elevatemigrations table or empty');
+      console.info('⚠️  No elevatemigrations table or empty');
     }
 
     // Check key tables exist
-    console.log('\n📊 Checking key tables...');
+    console.info('\n📊 Checking key tables...');
     const tables = ['programs', 'program_enrollments', 'profiles', 'lms_courses'];
     for (const table of tables) {
       const result = await client.query(`
         SELECT COUNT(*) as count FROM ${table} LIMIT 1
       `).catch(e => ({ rows: [{ count: `ERROR: ${e.message}` }] }));
-      console.log(`  ${table}: ${result.rows[0].count} rows`);
+      console.info(`  ${table}: ${result.rows[0].count} rows`);
     }
 
-    console.log('\n✅ Audit complete!');
+    console.info('\n✅ Audit complete!');
     
   } catch (err) {
     console.error('❌ Error:', err.message);

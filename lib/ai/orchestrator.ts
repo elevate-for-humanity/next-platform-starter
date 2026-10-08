@@ -29,6 +29,7 @@
 
 import { aiChat, aiReason, isReasoningAvailable } from '@/lib/ai/ai-service';
 import { logger } from '@/lib/logger';
+import { isAiDegradedError } from '@/lib/ai/degraded';
 import type { ChatMessage } from '@/lib/ai/types';
 import { getRAGContext } from '@/lib/platform/rag';
 import { getKnowledgeGraphContext } from '@/lib/platform/knowledge-graph';
