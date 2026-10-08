@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { Check, Clock, Loader2, ShoppingCart } from 'lucide-react';
 import type { IndividualAppCatalog } from '@/lib/apps/individual-app-plans';
+import { CouponInput } from '@/components/store/CouponInput';
 
 interface Props {
   catalog: IndividualAppCatalog;
@@ -12,6 +13,7 @@ interface Props {
 export function IndividualAppPlansSection({ catalog }: Props) {
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [couponByPlan, setCouponByPlan] = useState<Record<string, string>>({});
 
   const subscribe = async (planId: string) => {
     setError(null);
@@ -20,7 +22,7 @@ export function IndividualAppPlansSection({ catalog }: Props) {
       const res = await fetch('/api/apps/upgrade', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ appSlug: catalog.slug, plan: planId }),
+        body: JSON.stringify({ appSlug: catalog.slug, plan: planId, couponCode: couponByPlan[planId] || undefined }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -112,6 +114,10 @@ export function IndividualAppPlansSection({ catalog }: Props) {
                   ))}
                 </ul>
                 <div className="space-y-2">
+                  <div className={popular ? "rounded-lg bg-white p-3 text-slate-900" : "rounded-lg bg-slate-50 p-3 text-slate-900"}>
+                    <p className="mb-2 text-xs font-semibold">Have a coupon? Apply it at checkout</p>
+                    <CouponInput minPurchaseCents={plan.priceMonthly * 100} disabled={loadingPlan !== null} onCouponApplied={(code) => setCouponByPlan((previous) => ({...previous, [plan.id]: code}))} onCouponRemoved={() => setCouponByPlan((previous) => ({...previous, [plan.id]: ""}))} />
+                  </div>
                   <button
                     type="button"
                     disabled={loadingPlan !== null}
