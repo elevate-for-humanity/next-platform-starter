@@ -1,115 +1,26 @@
-name: Deploy LMS to Google Cloud Run
+name: Validate PARIS tax software source
 on:
   push:
     branches: [main]
     paths:
-      - 'app/**'
-      - 'components/**'
-      - 'lib/**'
-      - 'packages/**'
-      - 'public/**'
-      - 'next.config.mjs'
-      - 'Dockerfile.northflank-lms'
-      - 'pnpm-lock.yaml'
-      - 'package.json'
+      - 'app/tax/**'
+      - 'app/tax-software/**'
+      - 'app/api/tax/**'
+      - 'lib/tax-software/**'
+      - 'scripts/test-tax-*.mjs'
       - '.github/workflows/deploy-lms.yml'
   workflow_dispatch:
 permissions:
   contents: read
-  id-token: write
-concurrency:
-  group: google-cloud-web-deploy
-  cancel-in-progress: false
 jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    environment: production
+  validate:
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
-      - name: Validate Google-only configuration
-        env:
-          PROJECT: ${{ vars.GCP_PROJECT_ID }}
-          REGION: ${{ vars.GCP_REGION }}
-          PROVIDER: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-          ACCOUNT: ${{ vars.GCP_DEPLOY_SERVICE_ACCOUNT }}
-          TARGET: ${{ vars.GCP_LMS_SERVICE }}
-          REPOSITORY: ${{ vars.GCP_ARTIFACT_REPOSITORY }}
-        run: |
-          set -euo pipefail
-          for v in PROJECT REGION PROVIDER ACCOUNT TARGET REPOSITORY; do
-            test -n "${!v}" || { echo "::error::Missing Google configuration: $v"; exit 1; }
-          done
-          test "$PROJECT" = "elegant-racer-299721" || { echo "::error::Unexpected Google project"; exit 1; }
-      - uses: google-github-actions/auth@v2
-        with:
-          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-          service_account: ${{ vars.GCP_DEPLOY_SERVICE_ACCOUNT }}
-      - uses: google-github-actions/setup-gcloud@v2
-      - name: Configure Docker authentication
-        env:
-          REGION: ${{ vars.GCP_REGION }}
-        run: gcloud auth configure-docker "$REGION-docker.pkg.dev" --quiet
-      - uses: docker/setup-buildx-action@v3
-      - name: Verify build configuration
-        env:
-          SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-          SUPABASE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-        run: |
-          set -euo pipefail
-          test -n "$SUPABASE_URL" && test -n "$SUPABASE_KEY" || { echo "::error::Missing Supabase build configuration"; exit 1; }
-      - name: Build and push immutable image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: Dockerfile.northflank-lms
-          push: true
-          tags: ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/${{ vars.GCP_ARTIFACT_REPOSITORY }}/tax-lms:${{ github.sha }}
-          build-args: |
-            NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-            NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-      - name: Deploy existing Cloud Run service without modifying runtime configuration
-        env:
-          PROJECT: ${{ vars.GCP_PROJECT_ID }}
-          REGION: ${{ vars.GCP_REGION }}
-          SERVICE: ${{ vars.GCP_LMS_SERVICE }}
-          REPOSITORY: ${{ vars.GCP_ARTIFACT_REPOSITORY }}
-        run: |
-          set -euo pipefail
-          gcloud run services describe "$SERVICE" --project "$PROJECT" --region "$REGION" --format='value(metadata.name)' >/dev/null
-          IMAGE="$REGION-docker.pkg.dev/$PROJECT/$REPOSITORY/tax-lms:${GITHUB_SHA}"
-          gcloud run deploy "$SERVICE" --image "$IMAGE" --project "$PROJECT" --region "$REGION" --quiet
-          gcloud run services describe "$SERVICE" --project "$PROJECT" --region "$REGION" --format='value(status.conditions)'
-
-      - name: Verify deployed revision and traffic
-        env:
-          PROJECT: ${{ vars.GCP_PROJECT_ID }}
-          REGION: ${{ vars.GCP_REGION }}
-          SERVICE: ${{ vars.GCP_LMS_SERVICE }}
-          REPOSITORY: ${{ vars.GCP_ARTIFACT_REPOSITORY }}
-        run: |
-          set -euo pipefail
-          expected="$REGION-docker.pkg.dev/$PROJECT/$REPOSITORY/tax-lms:${GITHUB_SHA}"
-          ready="$(gcloud run services describe "$SERVICE" --project "$PROJECT" --region "$REGION" --format='value(status.latestReadyRevisionName)')"
-          test -n "$ready" || { echo "::error::No ready revision"; exit 1; }
-          image="$(gcloud run revisions describe "$ready" --project "$PROJECT" --region "$REGION" --format='value(spec.containers[0].image)')"
-          test "$image" = "$expected" || { echo "::error::Ready revision image mismatch"; exit 1; }
-          gcloud run services describe "$SERVICE" --project "$PROJECT" --region "$REGION" --format=json > /tmp/cloud-run-service.json
-          python3 - "$ready" <<'PY'
-          import json, sys
-          status = json.load(open("/tmp/cloud-run-service.json"))["status"]
-          ready = sys.argv[1]
-          conditions = status.get("conditions", [])
-          assert any(c.get("type") == "Ready" and c.get("status") == "True" for c in conditions), "Cloud Run Ready condition is not True"
-          traffic = status.get("traffic", [])
-          assert sum(int(t.get("percent", 0)) for t in traffic if t.get("revisionName") == ready) == 100, "Latest ready revision is not serving 100% of traffic"
-          PY
-          traffic="100"
-          {
-            echo "### Google Cloud Run deployment verified"
-            echo "- Service: $SERVICE"
-            echo "- Project: $PROJECT"
-            echo "- Revision: $ready"
-            echo "- Commit: $GITHUB_SHA"
-            echo "- Ready image: $image"
-            echo "- Traffic: $traffic%"
-          } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/setup-node@v4
+        with: {node-version: 24}
+      - run: node scripts/test-tax-calculation-failures.mjs
+      - run: node scripts/test-tax-w2-validation.mjs
+# The production owner is Elevate-lms/apps/marketing. That repository verifies
+# this source bundle and releases it through its existing Google Marketing job.
+# Do not overwrite the workforce LMS service with this source repository.
