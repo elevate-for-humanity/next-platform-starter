@@ -105,7 +105,7 @@ export default async function HomePage() {
           <p className="text-sm font-semibold text-sky-800">Supersonic Fast Cash · PARIS</p>
           <h2 className="mt-3 text-3xl font-bold text-slate-950">Explore our tax preparation software</h2>
           <p className="mt-4 max-w-2xl text-slate-600">Choose guided self-preparation or professional tax-office workflows, import supported documents, and review return information.</p>
-          <Link href="/tax-software" className="mt-6 inline-flex rounded-xl bg-sky-800 px-6 py-3 font-semibold text-white">Open PARIS tax software</Link>
+          <Link href="/tax" className="mt-6 inline-flex rounded-xl bg-sky-800 px-6 py-3 font-semibold text-white">Open PARIS tax software</Link>
         </div>
       </section>
       <HomeFinalCTA />

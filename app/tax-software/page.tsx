@@ -5,7 +5,7 @@ import { ArrowRight, Bot, BriefcaseBusiness, CheckCircle2, FileUp, FileCheck2, S
 export const metadata: Metadata = {
   title: 'Supersonic Fast Cash | AI-Assisted Tax Preparation Software',
   description: 'Explore guided self-filing, PARIS AI-assisted tax interviews, document review, and professional tax-office workflows.',
-  alternates: { canonical: '/tax-software' },
+  alternates: { canonical: '/tax' },
 };
 
 const images = {
