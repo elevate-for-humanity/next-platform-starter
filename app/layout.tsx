@@ -70,8 +70,6 @@ export const metadata: Metadata = {
   publisher: PLATFORM_DEFAULTS.orgName,
 
 
-  authors: [{ name: PLATFORM_DEFAULTS.orgName }],
-
   openGraph: {
     type: 'website',
     url: SITE_URL,
