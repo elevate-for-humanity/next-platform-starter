@@ -34,6 +34,11 @@ create table if not exists public.refund_tracking (
  id uuid primary key default gen_random_uuid(), return_id uuid not null references public.tax_returns(id) on delete cascade,
  refund_type text, expected_amount numeric(14,2), actual_amount numeric(14,2), status text, irs_status_code text, last_checked_at timestamptz,
  created_at timestamptz not null default now(), updated_at timestamptz not null default now());
+-- CREATE TABLE IF NOT EXISTS does not upgrade legacy intake/document tables.
+-- Add the ownership columns before creating policies that reference them.
+-- Existing rows remain unassigned; never infer taxpayer ownership from email.
+alter table public.tax_documents add column if not exists user_id uuid references auth.users(id) on delete set null;
+alter table public.tax_intake add column if not exists user_id uuid references auth.users(id) on delete set null;
 alter table public.tax_documents enable row level security; alter table public.tax_intake enable row level security;
 alter table public.tax_return_drafts enable row level security; alter table public.tax_calculations enable row level security;
 alter table public.refund_advance_applications enable row level security; alter table public.refund_tracking enable row level security;
