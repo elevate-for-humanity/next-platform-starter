@@ -3,8 +3,8 @@ import { compileTaxRoute, loadTaxRoute } from './tax-route-test-harness.mjs';
 import assert from 'node:assert/strict';
 const file =
   process.argv[2] ||
-  (existsSync('apps/marketing/app/api/tax/w2/confirm/route.ts')
-    ? 'apps/marketing/app/api/tax/w2/confirm/route.ts'
+  (existsSync('app/api/tax/w2/confirm/route.ts')
+    ? 'app/api/tax/w2/confirm/route.ts'
     : 'app/api/tax/w2/confirm/route.ts');
 const source = compileTaxRoute(file);
 async function run(body, user = true, owns = true) {

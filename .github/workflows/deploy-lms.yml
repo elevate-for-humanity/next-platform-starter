@@ -8,6 +8,11 @@ on:
       - 'app/api/tax/**'
       - 'lib/tax-software/**'
       - 'scripts/test-tax-*.mjs'
+      - 'scripts/tax-*.mjs'
+      - 'scripts/tax-*.py'
+      - 'tests/unit/tax-*.test.ts'
+      - 'tests/tax/**'
+      - 'vitest.tax.config.ts'
       - '.github/workflows/deploy-lms.yml'
   workflow_dispatch:
 permissions:
@@ -19,8 +24,17 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: {node-version: 24}
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec vitest run --config vitest.tax.config.ts
       - run: node scripts/test-tax-calculation-failures.mjs
       - run: node scripts/test-tax-w2-validation.mjs
-# The production owner is Elevate-lms/apps/marketing. That repository verifies
-# this source bundle and releases it through its existing Google Marketing job.
-# Do not overwrite the workforce LMS service with this source repository.
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install -r scripts/requirements-tax-ats.txt
+      - run: python -m unittest discover -s tests/tax -v
+      - run: node --test scripts/gcp/ensure-tax-encryption.test.mjs
+      - run: node scripts/tax-ats.mjs audit
+# Supersonic source is maintained here in next-platform-starter. This workflow
+# validates it without transmitting returns or changing any production service.
+# A separate runtime release remains necessary; source parity is not deployment proof.
